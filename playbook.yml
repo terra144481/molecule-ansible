@@ -1,0 +1,87 @@
+---
+- name: Playbook
+  hosts: all
+  become: yes
+  vars:
+    new_username: john
+    new_user_home: /better-place/{{ new_username }}
+    new_user_uid: 1234
+    sudoers_file_path: /etc/sudoers.d/{{ new_username }}
+    nice_script_content: |
+      #!/bin/bash
+      mount
+
+  tasks:
+    - name: Ensure /better-place directory exists
+      file:
+        path: "{{ new_user_home }}"
+        state: directory
+        mode: '0755'
+      become: yes
+
+    - name: Create nice-script.sh locally
+      copy:
+        dest: /nice-script.sh
+        content: "{{ nice_script_content }}"
+        mode: '0755'
+
+    - name: Copy nice-script.sh to remote machine
+      copy:
+        src: files/nice-script.sh
+        dest: "{{ new_user_home }}/nice-script.sh"
+        mode: '0755'
+
+    - name: Create new user
+      user:
+        name: "{{ new_username }}"
+        home: "{{ new_user_home }}"
+        uid: "{{ new_user_uid }}"
+      become: yes
+
+    - name: Allow user to run whoami with sudo without password
+      lineinfile:
+        path: "{{ sudoers_file_path }}"
+        line: "{{ new_username }} ALL=(ALL) NOPASSWD: /usr/bin/whoami"
+        state: present
+        create: yes
+        validate: 'visudo -cf %s'
+
+    - name: Update package cache
+      apt:
+        update_cache: yes
+      become: yes
+
+    - name: Install apt-file
+      apt:
+        name: apt-file
+        state: present
+      become: yes
+
+    - name: Update apt-file cache
+      shell: apt-file update
+      become: yes
+
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      become: yes
+      with_items:
+        - tmux
+        - vim
+        - unzip   # Required for downloading Terraform
+        - wget    # Required for downloading Terraform
+
+    - name: Download Terraform binary
+      get_url:
+        url: "https://releases.hashicorp.com/terraform/0.15.5/terraform_0.15.5_linux_amd64.zip"
+        dest: "/tmp/terraform.zip"
+
+    - name: Unzip Terraform binary
+      unarchive:
+        src: "/tmp/terraform.zip"
+        dest: "/usr/local/bin/"
+        remote_src: yes
+        creates: "/usr/local/bin/terraform"
+      become: yes
+
