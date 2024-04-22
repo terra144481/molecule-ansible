@@ -1,4 +1,4 @@
-*** Configuration Management Task - Ansible Molecule***
+***Configuration Management Task - Ansible Molecule***  
 To do:  
 Create a playbook that does the following:  
 1. Each new user should have a script called nice-script.sh in their home directory (hint: use "skeleton directory"). The script should list all mounted filesystems.  
