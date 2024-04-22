@@ -1,5 +1,21 @@
-## Configuration Management Task -
-Notes:
+*** Configuration Management Task - Ansible Molecule***
+To do:  
+Create a playbook that does the following:  
+1. Each new user should have a script called nice-script.sh in their home directory (hint: use "skeleton directory"). The script should list all mounted filesystems.  
+- Create the script with the correct command (locally)    
+- Copy the script to the remote machine into the correct directory  
+2. Creates a user with:  
+- Username: john  
+- Home: /better-place/john (create /better-place before if needed)  
+- User ID: 1234  
+3. User john should be able to run the following command with sudo without a need  
+to provide his password: whoami  
+4. Install packages:  
+- Tmux  
+- vim  
+- Install Terraform CLI  
+
+Notes:  
 
 1. Prepare the environment (install python, docker, molecile, etc)  
 2. Create a Python environment  ```#python3 -m venv .venv```
